@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SECcom Uploader 🔥</title>
+  <style>
+    :root{
+      --bg:#0b0b0c;
+      --panel:#131317;
+      --ink:#f0f2f6;
+      --muted:#9aa0a6;
+      --accent1:#ff4d00;  /* fire orange */
+      --accent2:#ffb300;  /* ember gold  */
+      --stroke:#262833;
+      --good:#00d084;
+      --bad:#ff5370;
+      --wait:#ffd166;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink); background:
+        radial-gradient(1200px 600px at 70% -10%, rgba(255,77,0,.25), transparent 60%),
+        radial-gradient(900px 500px at 0% 100%, rgba(255,179,0,.18), transparent 55%),
+        linear-gradient(180deg, #0b0b0c 0%, #0a0a0a 100%);
+      font-family: Inter, Segoe UI, Tahoma, Arial, sans-serif;
+      padding:24px;
+    }
+    .wrap{max-width:1100px;margin:0 auto}
+    .brand{
+      display:flex;align-items:center;gap:14px;margin-bottom:18px
+    }
+    .flame{
+      width:42px;height:42px;border-radius:12px;
+      background: conic-gradient(from 210deg, var(--accent1), var(--accent2), var(--accent1));
+      box-shadow:0 0 40px rgba(255,90,0,.35), inset 0 0 12px rgba(0,0,0,.35);
+    }
+    h1{margin:0;font-size:22px;letter-spacing:.3px}
+    .card{
+      background:var(--panel); border:1px solid var(--stroke);
+      border-radius:16px; padding:18px; margin-bottom:14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    label{font-weight:600;display:block;margin:8px 0 6px}
+    input[type="text"],input[type="date"],input[type="time"],input[type="number"],select,textarea{
+      width:100%;padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;
+      background:#0d0d11;color:var(--ink);outline:none;
+    }
+    input::placeholder,textarea::placeholder{color:var(--muted)}
+    input[type="file"]{padding:10px;background:#0d0d11;border:1px dashed var(--stroke);border-radius:12px}
+    .preview{
+      width:100%;max-height:240px;object-fit:contain;border:1px dashed var(--stroke);
+      border-radius:12px;padding:6px;background:#0b0b0e
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{
+      padding:10px 16px;border:none;border-radius:12px;cursor:pointer;font-weight:600
+    }
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      color:#1b1b1b; text-shadow:0 1px 0 rgba(255,255,255,.3);
+      box-shadow:0 6px 20px rgba(255,110,0,.35);
+    }
+    .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--stroke)}
+    .muted{color:var(--muted);font-size:13px}
+    .status{
+      border:1px solid var(--stroke); border-radius:14px; padding:10px 12px; background:#0b0b0f;
+    }
+    .status .head{
+      display:flex;align-items:center;gap:10px;margin-bottom:6px;font-weight:700;letter-spacing:.2px
+    }
+    .pill{padding:4px 10px;border-radius:999px;font-weight:700;font-size:12px}
+    .pill.good{background:rgba(0,208,132,.14);color:var(--good);border:1px solid rgba(0,208,132,.35)}
+    .pill.bad{background:rgba(255,83,112,.14);color:var(--bad);border:1px solid rgba(255,83,112,.35)}
+    .pill.wait{background:rgba(255,209,102,.14);color:var(--wait);border:1px solid rgba(255,209,102,.35)}
+    .bar{height:6px;border-radius:6px;background:#141419;overflow:hidden}
+    .bar>span{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .35s ease}
+    .hr{height:1px;background:var(--stroke);margin:14px 0}
+    .sectionTitle{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);margin-bottom:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <div class="flame"></div>
+      <h1>SECcom – Fire Ops Uploader</h1>
+    </div>
+
+    <!-- STATUS -->
+    <div class="card status" id="statusCard" aria-live="polite">
+      <div class="head"><span id="statusEmoji">🟧</span><span>STATUS</span><span id="statusPill" class="pill wait">WAIT</span></div>
+      <div id="statusText" class="muted">พร้อมส่งงาน</div>
+      <div class="bar" style="margin-top:8px"><span id="statusBar" style="width:0%"></span></div>
+    </div>
+
+    <!-- UPLOADS -->
+    <div class="card">
+      <div class="sectionTitle">ภาพถ่าย</div>
+      <div class="grid">
+        <div>
+          <label>ภาพที่ 1 (p1)</label>
+          <input id="p1" type="file" accept="image/*" capture="environment" />
+          <img id="prev1" class="preview" alt="Preview 1">
+        </div>
+        <div>
+          <label>ภาพที่ 2 (p2)</label>
+          <input id="p2" type="file" accept="image/*" capture="environment" />
+          <img id="prev2" class="preview" alt="Preview 2">
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="card">
+      <div class="sectionTitle">รายละเอียดงาน</div>
+      <div class="grid">
+        <div>
+          <label>ชนิดอุปกรณ์ (device_type)</label>
+          <select id="device_type"></select>
+        </div>
+        <div>
+          <label>final_point_address_text (ระบุเองอะไรก็ได้)</label>
+          <input id="final_point_address_text" type="text" placeholder="เช่น 68:1-2-1 หรือคำอธิบายอื่นๆ">
+        </div>
+        <div>
+          <label>อาคาร</label>
+          <input id="building" type="text" placeholder="เช่น กองบำบัด">
+        </div>
+        <div>
+          <label>พื้นที่</label>
+          <input id="area" type="text" placeholder="เช่น FL. 1">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>test_date (YYYY.MM.DD)</label>
+          <input id="test_date" type="date">
+          <div class="muted">จะถูกแปลงเป็น <b>YYYY.MM.DD</b></div>
+        </div>
+        <div>
+          <label>ครั้งที่</label>
+          <select id="khrang_thi"></select>
+        </div>
+        <div>
+          <label>ปีที่</label>
+          <select id="pi_thi"><option>1</option><option>2</option><option>3</option></select>
+        </div>
+        <div>
+          <label>งวดที่</label>
+          <select id="ngot_thi"></select>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>เดือน (ไทยย่อ + ปี ค.ศ.)</label>
+          <div class="row">
+            <select id="month_th" style="flex:1"></select>
+            <input id="month_year" type="number" min="2000" max="2100" style="width:120px">
+          </div>
+          <div class="muted">เช่น <b>ก.ค. 2025</b></div>
+        </div>
+        <div>
+          <label>ท่าอากาศยาน</label>
+          <select id="airport">
+            <option>ดอนเมือง</option><option>ภูเก็ต</option><option>หาดใหญ่</option>
+            <option>เชียงใหม่</option><option>เชียงราย</option>
+          </select>
+        </div>
+        <div>
+          <label>ชื่ออุปกรณ์</label>
+          <input id="device_name" type="text" placeholder="เช่น Smoke Detector">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>ผู้ปฏิบัติงาน</label>
+          <input id="operator_name" type="text" placeholder="เช่น นายสมชาย ใจดี">
+        </div>
+        <div>
+          <label>วันที่ดำเนินการ</label>
+          <input id="op_date" type="date">
+          <div class="muted">จะถูกแปลงเป็น <b>DD ม.ค./ก.พ./… YYYY</b></div>
+        </div>
+        <div>
+          <label>เวลาดำเนินการ</label>
+          <input id="op_time" type="text" placeholder="เช่น 09.00 - 11.00 น.">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>OK?</label>
+          <select id="ok"><option>Yes</option><option>No</option></select>
+        </div>
+        <div>
+          <label>Remark</label>
+          <input id="remark" type="text" placeholder="หมายเหตุ (ถ้ามี)">
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card">
+      <div class="row">
+        <button class="btn btn-primary" id="sendBtn">ส่งข้อมูล</button>
+        <button class="btn btn-ghost" id="clearBtn">Clear Form</button>
+      </div>
+      <div class="hr"></div>
+      <div class="sectionTitle">การเชื่อมต่อ</div>
+      <div class="grid">
+        <div>
+          <label>API URL</label>
+          <input id="apiUrl" type="text">
+        </div>
+        <div>
+          <label>API Key</label>
+          <input id="apiKey" type="text">
+        </div>
+      </div>
+      <div class="muted" style="margin-top:6px">*แก้ได้ที่ส่วนตัวแปรด้านบนของสคริปต์นี้ด้วย</div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+       🔧 HARD-CODE SETTINGS HERE
+       ========================= */
+    const CONFIG = {
+      API_URL: "https://api.yourdomain.com/submit",
+      API_KEY: "upload_123456",  // หรือปล่อยว่าง ""
+      POLL_TIMEOUT_MS: 180000,   // 3 นาที
+      POLL_INTERVAL_MS: 1400
+    };
+
+    // --------- internals ----------
+    const monthMap = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+    const deviceTypes = [
+      "1. Fire System Management Server",
+      "2. Fire Alarm Control Panel (Type 1: 4100ES FCP Basic)",
+      "3. Fire Alarm Control Panel (Type 2 :4100ES FCP Basic With VCC)",
+      "4. Fire Alarm Control Panel (Type 3 :4100ES Transponder, XPS Or Remote Power Supply)",
+      "5. Fire Alarm Control Panel (Type 4 : 4007 FCP - IDNAC)",
+      "6. Fire Alarm Workstation",
+      "7. Graphic Annunciator Board",
+      "8. Monitor Annunciator",
+      "9. Addressable Smoke detector with Base",
+      "10. Smoke detector With Base",
+      "11. Addressable Heat detector with Base",
+      "12. Heat detector with Base",
+      "13. Addressable Manual Pull Station",
+      "14. Manual Pull Station",
+      "15. Emergency Door Exit",
+      "16. Duct Smoke detector Addressable with Base",
+      "17. Addressable Air Aspiration Smoke Detection (XAD)",
+      "18. Beam Smoke detector (Conventional type)",
+      "19. Beam Smoke detector (Addressable type)",
+      "20. Speaker and Strobe Light",
+      "21. Speaker and Strobe Light (Addressable Strobe)",
+      "22. Speaker",
+      "23. Addressable Strobe and Horn",
+      "24. Strobe and Horn (Conventional )",
+      "25. Bell",
+      "26. อุปกรณ์แปลงสัญญาณชุดรับ (ชนิด IAM Module)",
+      "27. อุปกรณ์แปลงสัญญาณชุดรับ (ชนิด Zone Monitor Module)",
+      "28. อุปกรณ์แปลงสัญญาณชุดรับ (ชนิด Idnet Loop Isolator Module)",
+      "29. อุปกรณ์แปลงสัญญาณชุดส่ง (ชนิด Control Relay Module)",
+      "30. อุปกรณ์แปลงสัญญาณชุดส่ง (ชนิด Signal Relay Module)",
+      "31. แบตเตอรี่สำรอง (Battery Backup)",
+      "32. เครื่องสำรองไฟฟ้า  (UPS)"
+    ];
+    const el = id => document.getElementById(id);
+    const statusCard = el('statusCard'), statusText = el('statusText'),
+          statusPill = el('statusPill'), statusBar = el('statusBar'), statusEmoji = el('statusEmoji');
+
+    // populate lists
+    (function init(){
+      const dtSel = el('device_type');
+      deviceTypes.forEach(t=>{const o=document.createElement('option');o.textContent=t;dtSel.appendChild(o);});
+      const mSel = el('month_th'); monthMap.forEach(m=>{const o=document.createElement('option');o.textContent=m;mSel.appendChild(o);});
+      const now = new Date();
+      el('test_date').valueAsDate = now;
+      el('op_date').valueAsDate = now;
+      el('month_year').value = now.getFullYear();
+      mSel.selectedIndex = now.getMonth();
+      const kSel = el('khrang_thi'); for(let i=1;i<=36;i++){const o=document.createElement('option');o.textContent=`${i}/36`;kSel.appendChild(o);}
+      const nSel = el('ngot_thi');   for(let i=1;i<=36;i++){const o=document.createElement('option');o.textContent=`${i}`;nSel.appendChild(o);}
+      // preload connection vars from CONFIG
+      el('apiUrl').value = CONFIG.API_URL;
+      el('apiKey').value = CONFIG.API_KEY || "";
+      setStatus('idle', 'พร้อมส่งงาน');
+    })();
+
+    function setStatus(kind, text){
+      if(kind==='good'){ statusPill.className='pill good'; statusPill.textContent='OK'; statusEmoji.textContent='✅'; statusBar.style.width='100%'; }
+      else if(kind==='bad'){ statusPill.className='pill bad'; statusPill.textContent='ERROR'; statusEmoji.textContent='❌'; statusBar.style.width='0%'; }
+      else if(kind==='wait'){ statusPill.className='pill wait'; statusPill.textContent='WAIT'; statusEmoji.textContent='⏳'; statusBar.style.width='60%'; }
+      else { statusPill.className='pill wait'; statusPill.textContent='READY'; statusEmoji.textContent='🟧'; statusBar.style.width='0%'; }
+      statusText.textContent = text || '';
+    }
+
+    // previews
+    function showPreview(input, img){const f=input.files?.[0]; if(!f){img.src='';return;} const r=new FileReader(); r.onload=e=>img.src=e.target.result; r.readAsDataURL(f);}
+    el('p1').addEventListener('change',()=>showPreview(el('p1'),el('prev1')));
+    el('p2').addEventListener('change',()=>showPreview(el('p2'),el('prev2')));
+
+    // formatting helpers
+    const toYYYYMMDDdots = s => { const d=new Date(s); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), da=String(d.getDate()).padStart(2,'0'); return `${y}.${m}.${da}`; };
+    const opDateThai = s => { const d=new Date(s); const dd=String(d.getDate()); const m=monthMap[d.getMonth()]; const y=d.getFullYear(); return `${dd} ${m} ${y}`; };
+
+    // CLEAR form (only when you press)
+    el('clearBtn').onclick = () => {
+      ['final_point_address_text','building','area','device_name','operator_name','op_time','remark'].forEach(id=>el(id).value="");
+      el('p1').value = ""; el('p2').value = ""; el('prev1').src=""; el('prev2').src="";
+      setStatus('idle','ล้างฟอร์มแล้ว');
+    };
+
+    // SEND
+    el('sendBtn').onclick = async () => {
+      try{
+        const url = (el('apiUrl').value||"").trim(); if(!url) throw new Error("ยังไม่ได้ตั้งค่า API URL");
+        const p1 = el('p1').files?.[0], p2 = el('p2').files?.[0]; if(!p1||!p2) throw new Error("กรุณาเลือกภาพ p1 และ p2");
+
+        const fd = new FormData();
+        fd.append('test_date', toYYYYMMDDdots(el('test_date').value));
+        fd.append('final_point_address_text', el('final_point_address_text').value.trim());
+        fd.append('device_type', el('device_type').value);
+        fd.append('edit_ครั้งที่', el('khrang_thi').value);
+        fd.append('edit_ปีที่', el('pi_thi').value);
+        fd.append('edit_งวดที่', el('ngot_thi').value);
+        fd.append('edit_เดือน', `${el('month_th').value} ${el('month_year').value}`);
+        fd.append('edit_ท่าอากาศยาน', el('airport').value);
+        fd.append('edit_ผู้ปฏิบัติงาน', el('operator_name').value.trim());
+        fd.append('edit_วันที่ดำเนินการ', opDateThai(el('op_date').value));
+        fd.append('edit_เวลาดำเนินการ', el('op_time').value.trim());
+        fd.append('edit_อาคาร', el('building').value.trim());
+        fd.append('edit_พื้นที่', el('area').value.trim());
+        fd.append('OK?', el('ok').value);
+        fd.append('Remark', el('remark').value.trim());
+        fd.append('device_name', el('device_name').value.trim());
+        fd.append('p1', p1);
+        fd.append('p2', p2);
+
+        const headers = {};
+        const key = (el('apiKey').value||"").trim(); if(key) headers['x-api-key']=key;
+
+        setStatus('wait','กำลังอัปโหลด...');
+        const res = await fetch(url, { method:'POST', body:fd, headers });
+        if(!res.ok){ setStatus('bad', `เชื่อมต่อไม่สำเร็จ (${res.status})`); return; }
+        const { job_id, message } = await res.json();
+        if(!job_id){ setStatus('bad', 'ไม่มี job_id จากเซิร์ฟเวอร์'); return; }
+
+        setStatus('wait', message || 'เชื่อมต่อเซิร์ฟเวอร์สำเร็จ กำลังรอสถานะ...');
+        const base = url.replace(/\/submit\/?$/,'');
+        const end = Date.now() + CONFIG.POLL_TIMEOUT_MS;
+
+        while(Date.now() < end){
+          await new Promise(r=>setTimeout(r, CONFIG.POLL_INTERVAL_MS));
+          const s = await fetch(`${base}/status/${job_id}`);
+          if(!s.ok){ setStatus('bad','ตรวจสอบสถานะไม่สำเร็จ'); return; }
+          const js = await s.json();
+          if(js.status==='queued'){ setStatus('wait', js.message || `รอคิว ลำดับที่ ${js.position}`); continue; }
+          if(js.status==='running'){ setStatus('wait', js.message || 'ระบบกำลังประมวลผล...'); continue; }
+          if(js.status==='done'){ setStatus('good', js.message || 'บันทึกสำเร็จ คุณสามารถเริ่มงานใหม่ได้'); return; }
+          if(js.status==='error'){ setStatus('bad', js.message || 'เกิดข้อผิดพลาด'); return; }
+        }
+        setStatus('bad','หมดเวลารอผล กรุณาลองใหม่');
+      }catch(e){
+        setStatus('bad', `ผิดพลาด: ${e.message}`);
+      }
+    };
+  </script>
+</body>
+</html>
